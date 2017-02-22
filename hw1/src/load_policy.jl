@@ -59,4 +59,35 @@ function load_policy(filename)
 	return policy, ws
 end
 
+#=
+Expert Policies
+**Ant**
+Layer: layer_0, (111,64), (1,64)
+Layer: layer_2, (64,64), (1,64)
+Layer: out, (64,8), (1,8)
 
+**HalfCheetah**
+Layer: layer_0, (17,64), (1,64)
+Layer: layer_2, (64,64), (1,64)
+Layer: out, (64,6), (1,6)
+
+**Hopper**
+Layer: layer_0, (11,64), (1,64)
+Layer: layer_2, (64,64), (1,64)
+Layer: out, (64,3), (1,3)
+
+**Humanoid**
+Layer: layer_0, (376,64), (1,64)
+Layer: layer_2, (64,64), (1,64)
+Layer: out, (64,17), (1,17)
+
+**Reacher**
+Layer: layer_0, (11,64), (1,64)
+Layer: layer_2, (64,64), (1,64)
+Layer: out, (64,2), (1,2)
+
+**Walker**
+Layer: layer_0, (17,64), (1,64)
+Layer: layer_2, (64,64), (1,64)
+Layer: out, (64,6), (1,6)
+=#

@@ -27,6 +27,7 @@ function main()
 	actions = Any[]
 
 	max_steps = args["max_timesteps"] != 0 ? args["max_timesteps"] : env.spec.timestep_limit
+    println("Nondeterministic: $(env.spec.nondeterministic)")
 
 	for i=1:args["num_rollouts"]
 		obs = getInitialState(env)
