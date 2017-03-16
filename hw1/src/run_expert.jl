@@ -1,4 +1,4 @@
-using ReinforcementLearning, ArgParse
+using ReinforcementLearning, ArgParse, JLD
 
 include("load_policy.jl")
 
@@ -6,7 +6,6 @@ function parse_commandline()
 	s = ArgParseSettings()
 
 	@add_arg_table s begin
-		("--expert_policy_file"; help = "expert file")
 		("--envname"; help = "environment")
 		("--render"; action = :store_true)
 		("--max_timesteps"; default=0; arg_type=Int)
@@ -19,7 +18,7 @@ function main()
 	args = parse_commandline()
 	println("Loading expert policy")
 
-	policy, ws = load_policy(args["expert_policy_file"])
+	policy, ws = load_policy(string("experts/", args["envname"], ".pkl"))
 	env = GymEnv(args["envname"])
 
 	returns = Any[]
@@ -45,7 +44,12 @@ function main()
 				render_env(env)
 			end
 		end
+
+        println("Epoch: $i , Total Reward: $totalr")
 	end
+
+    println("Saving...")
+    save(string("experts/", args["envname"], ".jld"), "obs", observations, "acts", actions)
 end
 
 main()

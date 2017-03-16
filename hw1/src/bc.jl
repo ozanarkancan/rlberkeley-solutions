@@ -124,6 +124,8 @@ function train_bc()
     observations = d["obs"]
     actions = d["acts"]
 
+    println("Number of instances: $(length(actions))")
+
     data = minibatch(observations, actions, inps, outs; bs=args["bs"], atype=eval(parse(args["atype"])))
 
     for i=1:args["epoch"]
@@ -137,9 +139,48 @@ function train_bc()
     println("Bc: mean: $(mean(returns_bc)) std: $(std(returns_bc))")
 end
 
-train_bc()
+function experiment_numofinstances_bc()
+    args = parse_commandline()
+	println("Loading expert policy")
 
-#=
-*** STABLE MODELS ***
-Humanoid: --hidden 512 512 512 --bs 512 --epoch 400
-=#
+	policy, ws = load_policy(string("experts/", args["envname"], ".pkl"))
+    inps = size(ws[1], 1)
+    outs = size(ws[end-1], 2)
+
+    d = load(string("experts/", args["envname"], ".jld"))
+    observations = d["obs"]
+    actions = d["acts"]
+
+    println("Number of instances: $(length(actions))")
+
+    data = minibatch(observations, actions, inps, outs; bs=args["bs"], atype=eval(parse(args["atype"])))
+
+    returns_expert = rollouts(policy, ws, args["envname"]; max_timesteps=args["max_timesteps"], numrollouts=10, render=false)
+    println("Expert: mean: $(mean(returns_expert)) std: $(std(returns_expert))")
+
+    ms = Float32[]
+    stds = Float32[]
+
+    step = round(Int, length(data)/20)
+    for l=step:step:length(data)
+        w = weights(inps, outs, args["hidden"]...; atype=eval(parse(args["atype"])))
+        optf = eval(parse(args["opt"]))
+        opts = map(x->optf(), w)
+
+        for i=1:args["epoch"]
+            lss = train(w, data[1:l], opts)
+            println("Epoch: $i , Loss: $lss")
+        end
+        returns_bc = rollouts(bc_policy, w, args["envname"]; max_timesteps=args["max_timesteps"], numrollouts=10, render=false)
+        push!(ms, mean(returns_bc))
+        push!(stds, std(returns_bc))
+
+        println("Bc: mean: $(mean(returns_bc)) std: $(std(returns_bc))")
+    end
+
+    println("Means: $(ms)")
+    println("Stds: $(stds)")
+end
+
+#train_bc()
+experiment_numofinstances_bc()
