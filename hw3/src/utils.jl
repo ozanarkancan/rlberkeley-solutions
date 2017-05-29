@@ -4,15 +4,15 @@ using Images
 Resize the image applying the low pass filter first.
 Reference: http://juliaimages.github.io/latest/function_reference.html#Spatial-transformations-and-resizing-1
 """
-function transform(img, sz)
+function transform(img)
     if length(size(img)) < 3
         return reshape(img, size(img)..., 1)
     end
-
-    σ = map((o,n)->0.75*o/n, size(img), sz)
+    img = img[:, :, 1] * 0.299 + img[:, :, 2] * 0.587 + img[:, :, 3] * 0.114
+    σ = map((o,n)->0.75*o/n, size(img), (84, 84))
     kern = KernelFactors.gaussian(σ)
-    imgr = imresize(imfilter(img, kern, NA()), sz)
-    return reshape(imgr, size(imgr)...,1)
+    imgr = imresize(imfilter(img, kern, NA()), (84, 84))
+    return convert(Array{Float32}, reshape(imgr, size(imgr)...,1,1))
 end
 
 linear_interpolation(l, r, alpha) = l + alpha * (r - l)

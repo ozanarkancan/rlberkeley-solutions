@@ -10,7 +10,7 @@ end
 function convnet(w, x, stride; nh=2)
     inp = x
     for i=1:nh
-        inp = relu(conv4(w[string("w_",i)], x; stride=stride[i]))
+        inp = relu(conv4(w[string("w_",i)], x; stride=stride[i]) .+ w[string("b_", i)])
     end
     inp = reshape(inp, prod(size(inp)[1:3]), size(inp)[end])
     q = w["w_out"] * inp .+ w["b_out"]
@@ -44,7 +44,7 @@ function train!(model, prms, states, actions, targets; nh=1, stride=nothing)
     return val[1]
 end
 
-function init_weights(hiddens, nout; filters=nothing, strides=nothing, imgin=(32,32,3), winit=0.1, atype=Array{Float32})
+function init_weights(hiddens, nout; windows=nothing, filters=nothing, stride=nothing, imgin=(32,32,3), winit=0.1, atype=Array{Float32})
     w = Dict{String, Any}()
     if filters == nothing
         w["type"] = "mlp"
@@ -58,8 +58,15 @@ function init_weights(hiddens, nout; filters=nothing, strides=nothing, imgin=(32
     else
         w["type"] = "convnet"
         w["nh"] = length(filters)
+        inp = [imgin...]
         for i=1:length(filters)
+            w[string("w_",i)] = winit * randn(windows[i], windows[i], inp[3], filters[i])
+            w[string("b_",i)] = zeros(1, 1, filters[i], 1)
+            inp[1] = ceil((inp[1] - windows[i]) / stride[i]) + 1
+            inp[2] = ceil((inp[2] - windows[i]) / stride[i]) + 1
+            inp[3] = filters[i]
         end
+        inp = prod(inp)
     end
     w["w_out"] = winit * randn(nout, inp)
     w["b_out"] = zeros(nout, 1)
