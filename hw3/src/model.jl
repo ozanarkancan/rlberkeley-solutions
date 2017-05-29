@@ -10,10 +10,11 @@ end
 function convnet(w, x, stride; nh=2)
     inp = x
     for i=1:nh
-        inp = relu(conv4(w[string("w_",i)], x; stride=stride[i]) .+ w[string("b_", i)])
+        inp = relu(conv4(w[string("w_",i)], inp; stride=stride[i]) .+ w[string("b_", i)])
     end
     inp = reshape(inp, prod(size(inp)[1:3]), size(inp)[end])
-    q = w["w_out"] * inp .+ w["b_out"]
+    h = relu(w["fully_w"] * inp .+ w["fully_b"])
+    q = w["w_out"] * h .+ w["b_out"]
     return q
 end
 
@@ -46,7 +47,7 @@ end
 
 function init_weights(hiddens, nout; windows=nothing, filters=nothing, stride=nothing, imgin=(32,32,3), winit=0.1, atype=Array{Float32})
     w = Dict{String, Any}()
-    if filters == nothing
+    if length(filters) == 0
         w["type"] = "mlp"
         w["nh"] = length(hiddens)
         inp = prod(imgin)
@@ -67,6 +68,9 @@ function init_weights(hiddens, nout; windows=nothing, filters=nothing, stride=no
             inp[3] = filters[i]
         end
         inp = prod(inp)
+        w["fully_w"] = winit * randn(hiddens[1], inp)
+        w["fully_b"] = zeros(hiddens[1], 1)
+        inp = hiddens[1]
     end
     w["w_out"] = winit * randn(nout, inp)
     w["b_out"] = zeros(nout, 1)
@@ -80,4 +84,18 @@ function initparams(w; lr=0.001)
         d[k] = Adam(lr=lr)
     end
     return d
+end
+
+function savemodel(w, fname)
+    d = Dict()
+    for k in keys(w); if !(k=="type" || k=="nh"); d[k] = convert(Array{Float32}, w[k]); end; end;
+    d["type"] = w["type"]
+    d["nh"] = w["nh"]
+    save(fname, "model", d)
+end
+
+function loadmodel(fname, atype)
+    w = load(fname, "model")
+    for k in keys(w); if !(k=="type" || k=="nh"); w[k] = convert(atype, w[k]); end; end;
+    return w
 end
