@@ -9,9 +9,9 @@ function transform(img)
         return reshape(img, size(img)..., 1)
     end
     img = img[:, :, 1] * 0.299 + img[:, :, 2] * 0.587 + img[:, :, 3] * 0.114
-    σ = map((o,n)->0.75*o/n, size(img), (84, 84))
+    σ = map((o,n)->0.75*o/n, size(img), (42, 42))
     kern = KernelFactors.gaussian(σ)
-    imgr = imresize(imfilter(img, kern, NA()), (84, 84))
+    imgr = imresize(imfilter(img, kern, NA()), (42, 42))
     return convert(Array{Float32}, reshape(imgr, size(imgr)...,1,1))
 end
 

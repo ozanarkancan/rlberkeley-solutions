@@ -63,8 +63,8 @@ function init_weights(hiddens, nout; windows=nothing, filters=nothing, stride=no
         for i=1:length(filters)
             w[string("w_",i)] = winit * randn(windows[i], windows[i], inp[3], filters[i])
             w[string("b_",i)] = zeros(1, 1, filters[i], 1)
-            inp[1] = ceil((inp[1] - windows[i]) / stride[i]) + 1
-            inp[2] = ceil((inp[2] - windows[i]) / stride[i]) + 1
+            inp[1] = floor((inp[1] - windows[i]) / stride[i]) + 1
+            inp[2] = floor((inp[2] - windows[i]) / stride[i]) + 1
             inp[3] = filters[i]
         end
         inp = prod(inp)
