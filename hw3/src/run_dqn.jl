@@ -109,7 +109,7 @@ function main(args=ARGS)
     env = GymEnv(o["env"])
 
     imgin = size(getInitialState(env))
-    imgin = length(o["filters"]) != 0 ? (42, 42, o["stack"]) : (imgin[1]*o["stack"], imgin[2:end]...) #stack frames
+    imgin = length(o["filters"]) != 0 ? (84, 84, o["stack"]) : (imgin[1]*o["stack"], imgin[2:end]...) #stack frames
 
     if o["load"] == ""
         model = init_weights(o["hiddens"], length(env.actions);
@@ -123,7 +123,7 @@ function main(args=ARGS)
 
     buffer = ReplayBuffer(o["memory"])
 
-    exploration = PiecewiseSchedule([(0, 1.0), (round(Int, o["frames"]/1.25), 0.1), (round(Int, o["frames"]/2), 0.01)])
+    exploration = PiecewiseSchedule([(0, 1.0), (round(Int, o["frames"]/5), 0.1), (round(Int, o["frames"]/4), 0.01)])
 
     rewards, frames = dqn_learn(model, prms, env, buffer, exploration; args=o)
     save(string(split(o["save"], ".jld")[1], "_log.jld"), "rewards", rewards, "frames", frames)
