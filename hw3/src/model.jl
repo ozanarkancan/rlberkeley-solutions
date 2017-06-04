@@ -1,7 +1,7 @@
 function mlp(w, x; nh=1)
     inp = x
     for i=1:nh
-        inp = relu(w[string("w_",i)] * x .+ w[string("b_", i)])
+        inp = relu(w[string("w_",i)] * inp .+ w[string("b_", i)])
     end
     q = w["w_out"] * inp .+ w["b_out"]
     return q
