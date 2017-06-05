@@ -11,7 +11,6 @@ function dqn_learn(model, prms, env, buffer, exploration; args=nothing)
     episode_rewards = Float64[]
     frames = Float64[]
 
-    tupdate = round(Int, args["frames"] / 20)
     target = copy(model)
 
     for fnum=1:args["frames"]
@@ -55,7 +54,7 @@ function dqn_learn(model, prms, env, buffer, exploration; args=nothing)
                 readytosave += 100000
             end
 
-            if fnum % tupdate == 0
+            if fnum % args["tupdate"] == 0
                 target = copy(model)
             end
         end
@@ -96,6 +95,7 @@ function main(args=ARGS)
         ("--load"; default=""; help="model name")
         ("--atype";default=(gpu()>=0 ? "KnetArray{Float32}" : "Array{Float32}"))
         ("--play"; action=:store_true; help="only play")
+        ("--tupdate"; arg_type=Int; default=10000; help="frequency to update the target network")
     end
     isa(args, AbstractString) && (args=split(args))
     o = parse_args(args, s)
