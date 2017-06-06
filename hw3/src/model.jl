@@ -81,7 +81,7 @@ end
 function initparams(w; lr=0.001)
     d = Dict()
     for k in keys(w)
-        d[k] = Adam(lr=lr)
+        d[k] = Rmsprop(lr=lr)
     end
     return d
 end
